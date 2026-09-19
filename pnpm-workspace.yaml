@@ -1,0 +1,17 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+allowBuilds:
+  '@parcel/watcher': set this to true or false
+  bcrypt: true
+  esbuild: true
+  msgpackr-extract: true
+  unrs-resolver: set this to true or false
+minimumReleaseAgeExclude:
+  - '@expo/cli@57.0.26'
+  - expo-asset@57.0.18
+  - expo-constants@57.0.19
+  - expo@57.0.24
+  - '@expo/ui@57.0.19'
+  - expo-image-picker@57.0.19
+  - expo-router@57.0.22
