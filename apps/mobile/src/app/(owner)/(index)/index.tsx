@@ -6,62 +6,68 @@ import {
   View,
 } from "react-native";
 import React, { useEffect } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { RestaurantType } from "@food-delivery/types";
-import { api } from "@/lib/axios";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useMyRestaurant } from "@/hooks/useMyRestaurant";
+import { useToggleRestaurantOrders } from "@/hooks/useToggleRestaurantOrders";
+
 const OwnerKitchenScreen = () => {
-  const queryClient = useQueryClient();
+  const { data: restaurant, isLoading } = useMyRestaurant();
 
-  const { data: restaurant, isLoading } = useQuery<RestaurantType | null>({
-    queryKey: ["my-restaurant"],
-    queryFn: () =>
-      api
-        .get<RestaurantType | null>("/restaurants/mine")
-        .then((res) => res.data),
-  });
-
-  const { mutate: toggleIsAcceptingOrders } = useMutation({
-    mutationFn: () =>
-      api.patch(`/restaurants/${restaurant?.id}`, {
-        isAcceptingOrders: !restaurant?.isAcceptingOrders,
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["my-restaurant"] });
-    },
-  });
+  const { mutate: toggleIsAcceptingOrders, isPending: isTogglingOrders } =
+    useToggleRestaurantOrders();
 
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading) {
+      return;
+    }
+
     if (!restaurant) {
       router.replace("/(owner)/(index)/create-restaurant");
     }
-  }, [isLoading, restaurant, router]);
+  }, [isLoading, restaurant]);
 
-  if (isLoading) {
+  if (isLoading || !restaurant) {
     return (
-      <View>
-        <ActivityIndicator size="large" color={"#0000ff"} />
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#FF5A36" />
       </View>
     );
+  }
+
+  function handleToggleOrders() {
+    toggleIsAcceptingOrders({
+      restaurantId: restaurant!.id,
+      isAcceptingOrders: !restaurant!.isAcceptingOrders,
+    });
   }
 
   return (
     <SafeAreaView style={styles.container}>
       <View>
-        <Text style={styles.title}>{restaurant?.name}</Text>
+        <Text style={styles.title}>{restaurant.name}</Text>
 
         <Pressable
-          onPress={() => toggleIsAcceptingOrders()}
-          style={styles.statusButton}
+          onPress={handleToggleOrders}
+          disabled={isTogglingOrders}
+          style={[
+            styles.statusButton,
+            restaurant.isAcceptingOrders
+              ? styles.statusButtonOpen
+              : styles.statusButtonClosed,
+            isTogglingOrders && styles.disabledButton,
+          ]}
         >
-          <Text style={styles.statusText}>
-            {restaurant?.isAcceptingOrders
-              ? "Open - tap to close"
-              : "Close - tap to open"}
-          </Text>
+          {isTogglingOrders ? (
+            <ActivityIndicator color="#FFF" />
+          ) : (
+            <Text style={styles.statusText}>
+              {restaurant.isAcceptingOrders
+                ? "Open - tap to close"
+                : "Closed - tap to open"}
+            </Text>
+          )}
         </Pressable>
 
         <Pressable
@@ -84,36 +90,54 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     flex: 1,
   },
-  header: {
-    flexDirection: "row",
+
+  loadingContainer: {
+    flex: 1,
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "center",
   },
+
   title: {
     fontSize: 24,
     fontWeight: "600",
     color: "#1F2937",
   },
+
   statusButton: {
     backgroundColor: "#1F2937",
     padding: 10,
     borderRadius: 10,
     marginTop: 10,
   },
+
+  disabledButton: {
+    opacity: 0.6,
+  },
+
   statusText: {
     color: "#FFF",
     textAlign: "center",
     fontWeight: "600",
   },
+
   editButton: {
     backgroundColor: "#1F2937",
     padding: 10,
     borderRadius: 10,
     marginTop: 10,
   },
+
   editText: {
     color: "#FFF",
     textAlign: "center",
     fontWeight: "600",
+  },
+
+  statusButtonOpen: {
+    backgroundColor: "#16A34A",
+  },
+
+  statusButtonClosed: {
+    backgroundColor: "#DC2626",
   },
 });
