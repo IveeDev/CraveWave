@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { RestaurantsModule } from './restaurants/restaurants.module';
 import { CuisinesModule } from './cuisines/cuisines.module';
 import { UploadsModule } from './upload/upload.module';
+import { MenuModule } from './menu/menu.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { UploadsModule } from './upload/upload.module';
     RestaurantsModule,
     CuisinesModule,
     UploadsModule,
+    MenuModule,
   ],
   controllers: [AppController],
   providers: [AppService],
