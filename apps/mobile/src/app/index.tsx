@@ -1,17 +1,22 @@
 import { Redirect } from "expo-router";
-
 import { UserRole } from "@food-delivery/types";
 import { useAuthStore } from "@/store/auth-store";
 
 export default function Index() {
-  const { isLoading, user } = useAuthStore();
+  const { isLoading, user, hasCompletedOnboarding } = useAuthStore();
 
-  if (isLoading) {
+  if (isLoading || hasCompletedOnboarding === null) {
     return null;
   }
 
+  // Brand-new user
+  if (!hasCompletedOnboarding) {
+    return <Redirect href="/(auth)/onboarding" />;
+  }
+
+  // User has completed onboarding but isn't logged in
   if (!user) {
-    return <Redirect href="/(auth)/login" />;
+    return <Redirect href="/(auth)/welcome" />;
   }
 
   switch (user.role) {

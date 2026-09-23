@@ -16,12 +16,9 @@ import { colors, radius, spacing } from "@/constants/theme";
 import { UserRole } from "@food-delivery/types";
 import { useAuthStore } from "@/store/auth-store";
 
-import { ROLES } from "@/features/auth/roles";
-import {
-  DetailsStep,
-  FormState,
-} from "@/features/auth/components/details-step";
-import { RoleStep } from "@/features/auth/components/role-step";
+import { ROLES } from "@/constants/roles";
+import { DetailsStep, FormState } from "@/components/auth/details-step";
+import { RoleStep } from "@/components/auth/role-step";
 
 export default function RegisterScreen() {
   /*
@@ -105,7 +102,7 @@ export default function RegisterScreen() {
       return;
     }
 
-    router.back();
+    router.replace("/(auth)/onboarding");
   };
 
   /*

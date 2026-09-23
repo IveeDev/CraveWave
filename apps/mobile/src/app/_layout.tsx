@@ -1,14 +1,27 @@
+import { useEffect } from "react";
 import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthBootstrap } from "@/providers/auth-bootstrap";
 import { useAuthStore } from "@/store/auth-store";
 import { UserRole } from "@food-delivery/types";
 
+SplashScreen.preventAutoHideAsync();
+
 const queryClient = new QueryClient();
 
 function RootLayout() {
-  const { user, isLoading } = useAuthStore();
-  if (isLoading) return null;
+  const { user, isLoading, hasCompletedOnboarding } = useAuthStore();
+
+  const isReady = !isLoading && hasCompletedOnboarding !== null;
+
+  useEffect(() => {
+    if (isReady) {
+      SplashScreen.hideAsync();
+    }
+  }, [isReady]);
+
+  if (!isReady) return null;
 
   return (
     <Stack screenOptions={{ headerShown: false }}>

@@ -3,7 +3,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { UserRole } from "@food-delivery/types";
 
 import { colors, radius, spacing } from "@/constants/theme";
-import { ROLES } from "../roles";
+import { ROLES } from "../../constants/roles";
+import CustomButton from "@/components/CustomButton";
 
 type RoleStepProps = {
   selectedRole: UserRole | null;
@@ -103,23 +104,15 @@ export const RoleStep = ({
           );
         })}
       </View>
-
-      <Pressable
-        style={[
-          styles.primaryButton,
-          {
-            backgroundColor: activeRole
-              ? activeRole.accent
-              : colors.border.DEFAULT,
-          },
-        ]}
+      <CustomButton
+        title="Continue"
+        color={activeRole?.accent}
         disabled={!activeRole}
         onPress={onContinue}
-      >
-        <Text style={styles.primaryButtonText}>Continue</Text>
-
-        <Ionicons name="arrow-forward" size={20} color={colors.white} />
-      </Pressable>
+        IconRight={(iconProps) => (
+          <Ionicons name="arrow-forward" {...iconProps} />
+        )}
+      />
     </View>
   );
 };

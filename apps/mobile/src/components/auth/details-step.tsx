@@ -8,7 +8,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 
 import { colors, radius, spacing } from "@/constants/theme";
-import { RoleConfig } from "../roles";
+import { RoleConfig } from "../../constants/roles";
+import CustomButton from "@/components/CustomButton";
 
 export type FormState = {
   firstName: string;
@@ -187,23 +188,16 @@ export const DetailsStep = ({
 
       {error && <Text style={styles.errorText}>{error}</Text>}
 
-      <Pressable
-        style={[styles.primaryButton, { backgroundColor: role.accent }]}
+      <CustomButton
+        title={`Create ${role.label} Account`}
+        color={role.accent}
+        loading={loading}
         onPress={onSubmit}
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color={colors.white} />
-        ) : (
-          <>
-            <Text style={styles.primaryButtonText}>
-              Create {role.label} Account
-            </Text>
-
-            <Ionicons name="arrow-forward" size={20} color={colors.white} />
-          </>
+        IconRight={(iconProps) => (
+          <Ionicons name="arrow-forward" {...iconProps} />
         )}
-      </Pressable>
+        style={{ marginTop: spacing.sm }}
+      />
     </View>
   );
 };

@@ -4,6 +4,9 @@ import { User, UserRole } from "@food-delivery/types";
 
 import { api } from "@/lib/axios";
 import { deleteToken, getToken, saveToken } from "@/lib/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const ONBOARDING_KEY = "has_seen_onboarding";
 
 interface RegisterData {
   firstName: string;
@@ -19,6 +22,7 @@ interface RegisterData {
 interface AuthState {
   user: User | null;
   isLoading: boolean;
+  hasCompletedOnboarding: boolean | null; // null = not checked yet
 
   login: (email: string, password: string) => Promise<void>;
 
@@ -27,12 +31,14 @@ interface AuthState {
   logout: () => Promise<void>;
 
   restoreSession: () => Promise<void>;
+  checkOnboarding: () => Promise<void>;
+  completeOnboarding: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
-
   isLoading: true,
+  hasCompletedOnboarding: null,
 
   login: async (email, password) => {
     const response = await api.post("/auth/login", {
@@ -96,5 +102,15 @@ export const useAuthStore = create<AuthState>((set) => ({
         isLoading: false,
       });
     }
+  },
+
+  checkOnboarding: async () => {
+    const value = await AsyncStorage.getItem(ONBOARDING_KEY);
+    set({ hasCompletedOnboarding: value === "true" });
+  },
+
+  completeOnboarding: async () => {
+    await AsyncStorage.setItem(ONBOARDING_KEY, "true");
+    set({ hasCompletedOnboarding: true });
   },
 }));
