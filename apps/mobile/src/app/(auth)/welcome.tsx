@@ -1,4 +1,5 @@
 import {
+  Alert,
   Image,
   Pressable,
   ScrollView,
@@ -16,6 +17,7 @@ import bikeImage from "@/assets/images/bicycle.png";
 import shoppingBag from "@/assets/images/shopping-bag.png";
 import { Ionicons } from "@expo/vector-icons";
 import CustomButton from "@/components/CustomButton";
+import { api } from "@/lib/axios";
 
 const ROLE_HIGHLIGHTS = [
   { label: "Customer", caption: "Order Food", image: shoppingBag },
@@ -25,6 +27,41 @@ const ROLE_HIGHLIGHTS = [
 
 function ArrowIcon({ color, size }: { color: string; size: number }) {
   return <Ionicons name="arrow-forward" size={size} color={color} />;
+}
+const [apiStatus, setApiStatus] = React.useState("Not tested");
+
+async function testApiConnection() {
+  try {
+    setApiStatus("Connecting...");
+
+    const response = await api.get("/health");
+
+    console.log("API RESPONSE:", response.data);
+
+    setApiStatus(`Connected: ${JSON.stringify(response.data)}`);
+
+    Alert.alert(
+      "API Connected",
+      `Status: ${response.status}\n${JSON.stringify(response.data)}`,
+    );
+  } catch (error: any) {
+    console.error("API CONNECTION ERROR:", error);
+
+    setApiStatus(
+      `Failed: ${
+        error?.response?.data?.message || error?.message || "Unknown error"
+      }`,
+    );
+
+    Alert.alert(
+      "API Connection Failed",
+      error?.response
+        ? `HTTP ${error.response.status}\n${JSON.stringify(
+            error.response.data,
+          )}`
+        : error?.message || "Could not connect to API",
+    );
+  }
 }
 
 const Welcome = () => {

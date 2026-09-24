@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-
 import { useAuthStore } from "@/store/auth-store";
 
 export const AuthBootstrap = () => {
@@ -7,7 +6,11 @@ export const AuthBootstrap = () => {
   const checkOnboarding = useAuthStore((state) => state.checkOnboarding);
 
   useEffect(() => {
-    Promise.all([restoreSession(), checkOnboarding()]);
+    const bootstrap = async () => {
+      await Promise.all([restoreSession(), checkOnboarding()]);
+    };
+
+    bootstrap();
   }, [restoreSession, checkOnboarding]);
 
   return null;

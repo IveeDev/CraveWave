@@ -3,28 +3,23 @@ import React, { useRef, useState, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import Swiper from "react-native-swiper";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { colors } from "@/constants/theme";
 import { ONBOARDING_SLIDES } from "@/constants/onboarding-data";
 import CustomButton from "@/components/CustomButton";
-
-const ONBOARDING_STORAGE_KEY = "hasSeenOnboarding";
+import { useAuthStore } from "@/store/auth-store";
 
 const Onboarding = () => {
   const swiperRef = useRef<Swiper>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
+  const completeOnboarding = useAuthStore((state) => state.completeOnboarding);
+
   const isLastSlide = activeIndex === ONBOARDING_SLIDES.length - 1;
 
   const finishOnboarding = useCallback(async () => {
-    try {
-      await AsyncStorage.setItem(ONBOARDING_STORAGE_KEY, "true");
-    } catch (err) {
-      console.warn("Failed to persist onboarding state", err);
-    } finally {
-      router.replace("/(auth)/welcome");
-    }
-  }, []);
+    await completeOnboarding();
+    router.replace("/(auth)/welcome");
+  }, [completeOnboarding]);
 
   const handleNext = useCallback(() => {
     if (isLastSlide) {

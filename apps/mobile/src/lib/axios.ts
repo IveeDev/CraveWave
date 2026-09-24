@@ -1,5 +1,6 @@
 import axios from "axios";
 import Constants from "expo-constants";
+import { Platform } from "react-native";
 import { getToken } from "./auth";
 
 // Dynamically get the dev server host (works on any network)

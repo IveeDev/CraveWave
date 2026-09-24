@@ -6,6 +6,7 @@ import { AuthBootstrap } from "@/providers/auth-bootstrap";
 import { useAuthStore } from "@/store/auth-store";
 import { UserRole } from "@food-delivery/types";
 
+console.log("LAYOUT FILE LOADED");
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();

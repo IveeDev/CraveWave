@@ -78,39 +78,44 @@ export const useAuthStore = create<AuthState>((set) => ({
   restoreSession: async () => {
     try {
       const token = await getToken();
-
       if (!token) {
-        set({
-          user: null,
-          isLoading: false,
-        });
-
+        set({ user: null, isLoading: false });
         return;
       }
-
       const response = await api.get("/auth/me");
-
-      set({
-        user: response.data,
-        isLoading: false,
-      });
+      set({ user: response.data, isLoading: false });
     } catch (error) {
-      await deleteToken();
-
-      set({
-        user: null,
-        isLoading: false,
-      });
+      try {
+        await deleteToken();
+      } catch (deleteError) {
+        console.warn("Failed to delete token during cleanup", deleteError);
+      }
+      set({ user: null, isLoading: false }); // now this ALWAYS runs
     }
   },
 
   checkOnboarding: async () => {
-    const value = await AsyncStorage.getItem(ONBOARDING_KEY);
-    set({ hasCompletedOnboarding: value === "true" });
+    try {
+      const value = await AsyncStorage.getItem(ONBOARDING_KEY);
+
+      set({
+        hasCompletedOnboarding: value === "true",
+      });
+    } catch (error) {
+      console.error("Failed to check onboarding:", error);
+
+      // Safest fallback: treat it as a new user
+      set({
+        hasCompletedOnboarding: false,
+      });
+    }
   },
 
   completeOnboarding: async () => {
     await AsyncStorage.setItem(ONBOARDING_KEY, "true");
-    set({ hasCompletedOnboarding: true });
+
+    set({
+      hasCompletedOnboarding: true,
+    });
   },
 }));

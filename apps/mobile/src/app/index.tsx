@@ -5,6 +5,7 @@ import { useAuthStore } from "@/store/auth-store";
 export default function Index() {
   const { isLoading, user, hasCompletedOnboarding } = useAuthStore();
 
+  // Still checking session/onboarding
   if (isLoading || hasCompletedOnboarding === null) {
     return null;
   }
@@ -14,7 +15,7 @@ export default function Index() {
     return <Redirect href="/(auth)/onboarding" />;
   }
 
-  // User has completed onboarding but isn't logged in
+  // Onboarding completed, but user isn't logged in
   if (!user) {
     return <Redirect href="/(auth)/welcome" />;
   }
