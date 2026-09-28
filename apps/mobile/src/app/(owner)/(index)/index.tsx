@@ -9,14 +9,14 @@ import React, { useEffect } from "react";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useMyRestaurant } from "@/hooks/useMyRestaurant";
-import { useToggleRestaurantOrders } from "@/hooks/useToggleRestaurantOrders";
+import { useMyRestaurant } from "@/hooks/use-restaurant";
+import { useUpdateRestaurant } from "@/hooks/use-restaurant";
 
 const OwnerKitchenScreen = () => {
   const { data: restaurant, isLoading } = useMyRestaurant();
 
   const { mutate: toggleIsAcceptingOrders, isPending: isTogglingOrders } =
-    useToggleRestaurantOrders();
+    useUpdateRestaurant();
 
   useEffect(() => {
     if (isLoading) {
@@ -38,8 +38,10 @@ const OwnerKitchenScreen = () => {
 
   function handleToggleOrders() {
     toggleIsAcceptingOrders({
-      restaurantId: restaurant!.id,
-      isAcceptingOrders: !restaurant!.isAcceptingOrders,
+      id: restaurant!.id,
+      dto: {
+        isAcceptingOrders: !restaurant!.isAcceptingOrders,
+      },
     });
   }
 

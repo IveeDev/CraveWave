@@ -17,15 +17,23 @@ import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
 export class MenuService {
   constructor(@Inject('DB') private db: NeonHttpDatabase<typeof schema>) {}
 
-  //   CATEGORIES
-
-  async createCategory(ownerId: string, dto: CreateCategoryDto) {
+  private async getRestaurantByOwner(ownerId: string) {
     const [restaurant] = await this.db
       .select()
       .from(schema.restaurants)
       .where(eq(schema.restaurants.ownerId, ownerId));
 
-    if (!restaurant) throw new NotFoundException('Create a restaurant firts');
+    if (!restaurant) throw new NotFoundException('Create restaurant first!');
+
+    return restaurant;
+  }
+
+  //   CATEGORIES
+
+  async createCategory(ownerId: string, dto: CreateCategoryDto) {
+    const restaurant = await this.getRestaurantByOwner(ownerId);
+
+    if (!restaurant) new NotFoundException('Create restaurant first');
 
     const [category] = await this.db
       .insert(schema.menuCategories)
@@ -40,15 +48,12 @@ export class MenuService {
     return this.db
       .select()
       .from(schema.menuCategories)
-      .where(eq(schema.restaurants.id, restaurantId));
+      .where(eq(schema.menuCategories.restaurantId, restaurantId));
   }
 
   //   UpdateCategories
-  async updateCategory(
-    id: string,
-    restaurantId: string,
-    dto: UpdateCategoryDto,
-  ) {
+  async updateCategory(id: string, ownerId: string, dto: UpdateCategoryDto) {
+    const restaurant = await this.getRestaurantByOwner(ownerId);
     const [category] = await this.db
       .select()
       .from(schema.menuCategories)
@@ -56,7 +61,7 @@ export class MenuService {
 
     if (!category) throw new NotFoundException('Category not found');
 
-    if (category.restaurantId !== restaurantId)
+    if (category.restaurantId !== restaurant.id)
       throw new ForbiddenException(
         'This category does not belong to your restaurant',
       );
@@ -70,15 +75,16 @@ export class MenuService {
     return updatedCategory;
   }
 
-  async deleteCategory(id: string, restaurantId: string) {
+  async deleteCategory(id: string, ownerId: string) {
+    const restaurant = await this.getRestaurantByOwner(ownerId);
     const [category] = await this.db
       .select()
       .from(schema.menuCategories)
-      .where(eq(schema.menuCategories, id));
+      .where(eq(schema.menuCategories.id, id));
 
     if (!category) throw new NotFoundException('Category Not Found');
 
-    if (category.restaurantId !== restaurantId)
+    if (category.restaurantId !== restaurant.id)
       throw new ForbiddenException(
         'This category does not belong to your restaurant',
       );
@@ -93,10 +99,7 @@ export class MenuService {
 
   //   MenuItems:
   async createMenuItem(ownerId: string, dto: CreateMenuItemDto) {
-    const [restaurant] = await this.db
-      .select()
-      .from(schema.restaurants)
-      .where(eq(schema.restaurants.ownerId, ownerId));
+    const restaurant = await this.getRestaurantByOwner(ownerId);
 
     if (!restaurant) throw new NotFoundException('Create a restaurant firs');
 
@@ -127,11 +130,8 @@ export class MenuService {
       .where(eq(schema.menuItems.restaurantId, restaurantId));
   }
 
-  async updateMenuItem(
-    id: string,
-    restaurantId: string,
-    dto: UpdateMenuItemDto,
-  ) {
+  async updateMenuItem(id: string, ownerId: string, dto: UpdateMenuItemDto) {
+    const restaurant = await this.getRestaurantByOwner(ownerId);
     const [menuItem] = await this.db
       .select()
       .from(schema.menuItems)
@@ -139,7 +139,7 @@ export class MenuService {
 
     if (!menuItem) throw new NotFoundException('Menu item not found');
 
-    if (menuItem.restaurantId !== restaurantId)
+    if (menuItem.restaurantId !== restaurant.id)
       throw new ForbiddenException(
         'This item does not belong to your restaurant',
       );
@@ -153,7 +153,8 @@ export class MenuService {
     return updatedItem;
   }
 
-  async deleteMenuItem(id: string, restaurantId: string) {
+  async deleteMenuItem(id: string, ownerId: string) {
+    const restaurant = await this.getRestaurantByOwner(ownerId);
     const [menuItem] = await this.db
       .select()
       .from(schema.menuItems)
@@ -161,7 +162,7 @@ export class MenuService {
 
     if (!menuItem) throw new NotFoundException('Menu item not found');
 
-    if (menuItem.restaurantId !== restaurantId)
+    if (menuItem.restaurantId !== restaurant.id)
       throw new ForbiddenException(
         'This item does not belong to your restaurant',
       );

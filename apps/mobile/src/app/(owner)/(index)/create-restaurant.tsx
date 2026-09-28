@@ -12,9 +12,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useCuisines } from "@/hooks/useCuisines";
-import { useCreateRestaurant } from "@/hooks/useCreateRestaurant";
-import { useUploadRestaurantImage } from "@/hooks/useUploadRestaurantImage";
+import { useCuisines } from "@/hooks/use-cuisines";
+import { useCreateRestaurant } from "@/hooks/use-restaurant";
+import { useImageUpload } from "@/hooks/use-image-upload";
 
 import {
   QUICK_FILL_TEMPLATES,
@@ -24,7 +24,7 @@ import {
 import { RestaurantHeader } from "@/components/restaurant/RestaurantHeader";
 import QuickFillTemplates from "@/components/restaurant/QuickFillTemplate";
 import CuisineSelector from "@/components/restaurant/CuisineSelector";
-import { RestaurantImagePicker } from "@/components/restaurant/RestaurantImagePicker";
+import { ImagePickerField } from "@/components/ImagePickerField";
 import { PrepTimeSelector } from "@/components/restaurant/PrepTimeSelector";
 import { PayoutBanner } from "@/components/restaurant/PayoutBanner";
 import CreateRestaurantButton from "@/components/restaurant/CreateRestaurantButton";
@@ -49,7 +49,7 @@ const CreateRestaurantScreen = () => {
 
   const { data: cuisines = [], isLoading: isLoadingCuisines } = useCuisines();
 
-  const { uploadImage, isUploading } = useUploadRestaurantImage();
+  const { uploadImage, isUploading } = useImageUpload("restaurant");
 
   const { mutate: createRestaurant, isPending: isCreating } =
     useCreateRestaurant();
@@ -218,10 +218,12 @@ const CreateRestaurantScreen = () => {
             Storefront cover photo
           </Text>
 
-          <RestaurantImagePicker
+          <ImagePickerField
             imageUrl={imageUrl}
             isUploading={isUploading}
             onPress={handlePickImage}
+            variant="banner" // make it full-width like your screenshot
+            placeholder="Upload storefront photo"
           />
         </View>
 

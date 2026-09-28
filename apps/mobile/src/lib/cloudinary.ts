@@ -3,7 +3,7 @@ import * as ImagePicker from "expo-image-picker";
 import { Alert } from "react-native";
 import { api } from "@/lib/axios";
 
-type UploadType = "restaurant" | "menuItem" | "profile";
+export type UploadType = "restaurant" | "menuItem" | "profile";
 
 export async function pickAndUploadImage(
   type: UploadType,

@@ -1,21 +1,17 @@
 import { useState } from "react";
-import { pickAndUploadImage } from "@/lib/cloudinary";
+import { pickAndUploadImage, UploadType } from "@/lib/cloudinary";
 
-export function useUploadRestaurantImage() {
+export function useImageUpload(type: UploadType) {
   const [isUploading, setIsUploading] = useState(false);
 
   const uploadImage = async () => {
     try {
       setIsUploading(true);
-
-      return await pickAndUploadImage("restaurant");
+      return await pickAndUploadImage(type);
     } finally {
       setIsUploading(false);
     }
   };
 
-  return {
-    uploadImage,
-    isUploading,
-  };
+  return { uploadImage, isUploading };
 }

@@ -17,13 +17,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { colors, radius, spacing } from "@/constants/theme";
 import { useAuthStore } from "@/store/auth-store";
 import { useState } from "react";
+import FormInput from "@/components/FormInput";
 
 const LoginScreen = () => {
   const { login } = useAuthStore();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleLogin() {
@@ -68,69 +68,29 @@ const LoginScreen = () => {
           </Text>
 
           {/* Email Field */}
-          <View style={styles.fieldContainer}>
-            <Text style={styles.label}>Email address</Text>
-
-            <View style={styles.inputWrapper}>
-              <Ionicons
-                name="mail-outline"
-                size={20}
-                color={colors.text.muted}
-              />
-
-              <TextInput
-                style={styles.input}
-                value={email}
-                onChangeText={setEmail}
-                placeholder="name@example.com"
-                placeholderTextColor={colors.text.muted}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-            </View>
-          </View>
+          <FormInput
+            label="Email address"
+            icon="mail-outline"
+            value={email}
+            onChangeText={setEmail}
+            placeholder="name@example.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
 
           {/* Password Field */}
-          <View style={styles.fieldContainer}>
-            <View style={styles.passwordHeader}>
-              <Text style={styles.label}>Password</Text>
-
-              <Pressable hitSlop={8}>
-                <Text style={styles.forgotPassword}>Forgot password?</Text>
-              </Pressable>
-            </View>
-
-            <View style={styles.inputWrapper}>
-              <Ionicons
-                name="lock-closed-outline"
-                size={20}
-                color={colors.text.muted}
-              />
-
-              <TextInput
-                style={styles.input}
-                placeholder="Enter your password"
-                value={password}
-                onChangeText={setPassword}
-                placeholderTextColor={colors.text.muted}
-                secureTextEntry={!showPassword}
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-
-              <Pressable
-                hitSlop={8}
-                onPress={() => setShowPassword((prev) => !prev)}
-              >
-                <Ionicons
-                  name={showPassword ? "eye-off-outline" : "eye-outline"}
-                  size={20}
-                  color={colors.text.muted}
-                />
-              </Pressable>
-            </View>
-          </View>
+          <FormInput
+            label="Password"
+            icon="lock-closed-outline"
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Enter your password"
+            secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+            style={{ marginBottom: spacing.lg }}
+          />
 
           {/* Login Button */}
           <Pressable

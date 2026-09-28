@@ -48,8 +48,6 @@ export default function RegisterScreen() {
     confirmPassword: "",
   });
 
-  const [showPassword, setShowPassword] = useState(false);
-
   const [loading, setLoading] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
@@ -250,8 +248,6 @@ export default function RegisterScreen() {
               role={activeRole}
               form={form}
               onChange={updateField}
-              showPassword={showPassword}
-              onToggleShowPassword={() => setShowPassword((value) => !value)}
               error={error}
               loading={loading}
               onSubmit={handleSubmit}

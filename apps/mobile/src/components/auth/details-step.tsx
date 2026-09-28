@@ -1,15 +1,10 @@
-import {
-  ActivityIndicator,
-  Pressable,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { colors, radius, spacing } from "@/constants/theme";
 import { RoleConfig } from "../../constants/roles";
 import CustomButton from "@/components/CustomButton";
+import FormInput from "@/components/FormInput";
 
 export type FormState = {
   firstName: string;
@@ -24,8 +19,6 @@ type DetailsStepProps = {
   role: RoleConfig;
   form: FormState;
   onChange: (key: keyof FormState, value: string) => void;
-  showPassword: boolean;
-  onToggleShowPassword: () => void;
   error: string | null;
   loading: boolean;
   onSubmit: () => void;
@@ -35,8 +28,6 @@ export const DetailsStep = ({
   role,
   form,
   onChange,
-  showPassword,
-  onToggleShowPassword,
   error,
   loading,
   onSubmit,
@@ -57,134 +48,75 @@ export const DetailsStep = ({
 
       {/* First + Last name */}
       <View style={styles.rowFields}>
-        <View style={[styles.fieldContainer, styles.halfField]}>
-          <Text style={styles.label}>First Name</Text>
+        <FormInput
+          label="First Name"
+          placeholder="Alex"
+          value={form.firstName}
+          onChangeText={(value) => onChange("firstName", value)}
+          style={{ flex: 1 }}
+          containerStyle={styles.halfField}
+        />
 
-          <View style={styles.inputWrapper}>
-            <TextInput
-              style={styles.input}
-              placeholder="Alex"
-              placeholderTextColor={colors.text.muted}
-              value={form.firstName}
-              onChangeText={(value) => onChange("firstName", value)}
-            />
-          </View>
-        </View>
-
-        <View style={[styles.fieldContainer, styles.halfField]}>
-          <Text style={styles.label}>Last Name</Text>
-
-          <View style={styles.inputWrapper}>
-            <TextInput
-              style={styles.input}
-              placeholder="Morgan"
-              placeholderTextColor={colors.text.muted}
-              value={form.lastName}
-              onChangeText={(value) => onChange("lastName", value)}
-            />
-          </View>
-        </View>
+        <FormInput
+          label="Last Name"
+          placeholder="Morgan"
+          value={form.lastName}
+          onChangeText={(value) => onChange("lastName", value)}
+          style={{ flex: 1 }}
+          containerStyle={styles.halfField}
+        />
       </View>
 
-      {/* Email */}
-      <View style={styles.fieldContainer}>
-        <Text style={styles.label}>Email Address</Text>
+      <FormInput
+        label="Email Address"
+        icon="mail-outline"
+        placeholder="alex@example.com"
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoCorrect={false}
+        value={form.email}
+        onChangeText={(value) => onChange("email", value)}
+        containerStyle={styles.fieldContainer}
+      />
 
-        <View style={styles.inputWrapper}>
-          <Ionicons name="mail-outline" size={20} color={colors.text.muted} />
+      <FormInput
+        label="Phone Number"
+        icon="call-outline"
+        placeholder="+1 (415) 555-0182"
+        keyboardType="phone-pad"
+        value={form.phone}
+        onChangeText={(value) => onChange("phone", value)}
+        containerStyle={styles.fieldContainer}
+      />
 
-          <TextInput
-            style={styles.input}
-            placeholder="alex@example.com"
-            placeholderTextColor={colors.text.muted}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoCorrect={false}
-            value={form.email}
-            onChangeText={(value) => onChange("email", value)}
-          />
-        </View>
+      <FormInput
+        label="Password"
+        icon="lock-closed-outline"
+        placeholder="Create password"
+        secureTextEntry
+        autoCapitalize="none"
+        autoCorrect={false}
+        value={form.password}
+        onChangeText={(value) => onChange("password", value)}
+        containerStyle={styles.fieldContainer}
+      />
+
+      <View style={styles.hintRow}>
+        <Text style={styles.hintText}>8+ characters</Text>
+        <Text style={styles.hintText}>1+ number</Text>
       </View>
 
-      {/* Phone */}
-      <View style={styles.fieldContainer}>
-        <Text style={styles.label}>Phone Number</Text>
-
-        <View style={styles.inputWrapper}>
-          <Ionicons name="call-outline" size={20} color={colors.text.muted} />
-
-          <TextInput
-            style={styles.input}
-            placeholder="+1 (415) 555-0182"
-            placeholderTextColor={colors.text.muted}
-            keyboardType="phone-pad"
-            value={form.phone}
-            onChangeText={(value) => onChange("phone", value)}
-          />
-        </View>
-      </View>
-
-      {/* Password */}
-      <View style={styles.fieldContainer}>
-        <Text style={styles.label}>Password</Text>
-
-        <View style={styles.inputWrapper}>
-          <Ionicons
-            name="lock-closed-outline"
-            size={20}
-            color={colors.text.muted}
-          />
-
-          <TextInput
-            style={styles.input}
-            placeholder="Create password"
-            placeholderTextColor={colors.text.muted}
-            secureTextEntry={!showPassword}
-            autoCapitalize="none"
-            autoCorrect={false}
-            value={form.password}
-            onChangeText={(value) => onChange("password", value)}
-          />
-
-          <Pressable hitSlop={8} onPress={onToggleShowPassword}>
-            <Ionicons
-              name={showPassword ? "eye-off-outline" : "eye-outline"}
-              size={20}
-              color={colors.text.muted}
-            />
-          </Pressable>
-        </View>
-
-        <View style={styles.hintRow}>
-          <Text style={styles.hintText}>8+ characters</Text>
-
-          <Text style={styles.hintText}>1+ number</Text>
-        </View>
-      </View>
-
-      {/* Confirm password */}
-      <View style={styles.fieldContainer}>
-        <Text style={styles.label}>Confirm Password</Text>
-
-        <View style={styles.inputWrapper}>
-          <Ionicons
-            name="lock-closed-outline"
-            size={20}
-            color={colors.text.muted}
-          />
-
-          <TextInput
-            style={styles.input}
-            placeholder="Re-enter password"
-            placeholderTextColor={colors.text.muted}
-            secureTextEntry={!showPassword}
-            autoCapitalize="none"
-            autoCorrect={false}
-            value={form.confirmPassword}
-            onChangeText={(value) => onChange("confirmPassword", value)}
-          />
-        </View>
-      </View>
+      <FormInput
+        label="Confirm Password"
+        icon="lock-closed-outline"
+        placeholder="Re-enter password"
+        secureTextEntry
+        autoCapitalize="none"
+        autoCorrect={false}
+        value={form.confirmPassword}
+        onChangeText={(value) => onChange("confirmPassword", value)}
+        containerStyle={styles.fieldContainer}
+      />
 
       {error && <Text style={styles.errorText}>{error}</Text>}
 
@@ -210,12 +142,10 @@ const styles = {
     borderRadius: radius.full,
     marginTop: spacing.lg,
   },
-
   roleTagText: {
     fontSize: 11,
     fontWeight: "700" as const,
   },
-
   title: {
     fontSize: 28,
     lineHeight: 34,
@@ -223,7 +153,6 @@ const styles = {
     color: colors.text.primary,
     marginTop: spacing["2xl"],
   },
-
   subtitle: {
     fontSize: 15,
     marginTop: spacing.sm,
@@ -231,77 +160,31 @@ const styles = {
     lineHeight: 22,
     marginBottom: spacing["2xl"],
   },
-
   rowFields: {
     flexDirection: "row" as const,
     gap: spacing.md,
+    marginBottom: spacing.lg,
   },
-
   halfField: {
     flex: 1,
+    marginBottom: 0,
   },
-
   fieldContainer: {
     marginBottom: spacing.lg,
   },
-
-  label: {
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: "600" as const,
-    color: colors.text.primary,
-    marginBottom: spacing.sm,
-  },
-
-  inputWrapper: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    gap: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border.DEFAULT,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.lg,
-    height: 52,
-    backgroundColor: colors.white,
-  },
-
-  input: {
-    flex: 1,
-    fontSize: 14,
-    color: colors.text.primary,
-    height: "100%" as const,
-  },
-
   hintRow: {
     flexDirection: "row" as const,
     gap: spacing.md,
-    marginTop: spacing.sm,
+    marginTop: -spacing.sm,
+    marginBottom: spacing.lg,
   },
-
   hintText: {
     fontSize: 12,
     color: colors.text.muted,
   },
-
   errorText: {
     fontSize: 13,
     color: "#DC2626",
     marginBottom: spacing.md,
-  },
-
-  primaryButton: {
-    height: 52,
-    borderRadius: radius.md,
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-    gap: spacing.sm,
-    marginTop: spacing.sm,
-  },
-
-  primaryButtonText: {
-    color: colors.white,
-    fontSize: 15,
-    fontWeight: "700" as const,
   },
 };
