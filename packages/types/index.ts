@@ -8,20 +8,11 @@ export type UserRole = (typeof UserRole)[keyof typeof UserRole];
 
 export interface User {
   id: string;
+  email: string;
   firstName: string;
   lastName: string;
-  email: string;
   role: UserRole;
-  phoneNumber: string;
-  profileImageUrl?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface JwtPayload {
-  sub: string;
-  email: string;
-  role: UserRole;
+  createdAt: Date;
 }
 
 export interface HealthCheckResponse {
@@ -29,51 +20,92 @@ export interface HealthCheckResponse {
   timestamp: Date;
 }
 
+export interface JwtPayload {
+  sub: string;
+  email: string;
+  role: string;
+}
+
 export interface RestaurantType {
   id: string;
   ownerId: string;
   name: string;
-  description: string;
+  description: string | null;
+  imageUrl: string | null;
   address: string;
-  preparationTimeMinutes: number;
-  kitchenPhone: string;
-  isAcceptingOrders: boolean;
-  imageUrl: string;
-  cuisineId: string[];
+  cuisineType: string;
+  isOpen: boolean;
+  rating: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface CategoryType {
+export interface MenuCategory {
   id: string;
   restaurantId: string;
   name: string;
   createdAt: Date;
-  updatedAt: Date;
 }
 
-export interface MenuItemType {
+export interface MenuItem {
   id: string;
-  restaurantId: string;
   categoryId: string;
+  restaurantId: string;
   name: string;
-  description?: string;
-  price: string; // matches your DTO's @IsNumberString
-  imageUrl?: string;
-  prepTime: number;
+  description: string | null;
+  price: string;
+  imageUrl: string | null;
   isAvailable: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface Cuisine {
-  id: string;
-  name: string;
-}
-
 export interface RestaurantWithMenu {
   restaurant: RestaurantType;
-  cuisines: Cuisine[];
-  categories: CategoryType[];
-  menuItems: MenuItemType[];
+  categories: MenuCategory[];
+  items: MenuItem[];
+}
+
+export const OrderStatus = {
+  PENDING: "PENDING",
+  CONFIRMED: "CONFIRMED",
+  PREPARING: "PREPARING",
+  READY: "READY",
+  PICKED_UP: "PICKED_UP",
+  DELIVERED: "DELIVERED",
+  CANCELLED: "CANCELLED",
+} as const;
+
+export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus];
+
+export interface CartItem {
+  id: string; // menuItem id
+  name: string;
+  price: string;
+  imageUrl: string | null;
+  restaurantId: string;
+  restaurantName: string;
+  quantity: number;
+}
+
+export interface Order {
+  id: string;
+  customerId: string;
+  restaurantId: string;
+  driverId: string | null;
+  status: OrderStatus;
+  totalAmount: string;
+  deliveryAddress: string;
+  stripePaymentIntentId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface OrderItem {
+  id: string;
+  orderId: string;
+  menuItemId: string;
+  quantity: string;
+  unitPrice: string;
+  createdAt: Date;
 }

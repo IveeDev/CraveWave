@@ -13,7 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { colors } from "@/constants/theme";
 
 type FormInputProps = TextInputProps & {
-  label: string;
+  label?: string;
   required?: boolean;
   icon?: keyof typeof Ionicons.glyphMap;
   labelRight?: React.ReactNode;
@@ -35,13 +35,15 @@ const FormInput = ({
 
   return (
     <View style={[styles.wrapper, containerStyle]}>
-      <View style={styles.labelRow}>
-        <Text style={styles.label}>
-          {label}
-          {required && " *"}
-        </Text>
-        {labelRight}
-      </View>
+      {(label || labelRight) && (
+        <View style={styles.labelRow}>
+          <Text style={styles.label}>
+            {label}
+            {required && " *"}
+          </Text>
+          {labelRight}
+        </View>
+      )}
 
       <View style={styles.inputWrapper}>
         {icon && <Ionicons name={icon} size={20} color={colors.text.muted} />}
