@@ -13,14 +13,13 @@ import { restaurants } from './restaurants';
 import { users } from './users';
 
 export const orderStatusEnum = pgEnum('order_status', [
-  'PENDING',
-  'CONFIRMED',
-  'PREPARING',
-  'READY_FOR_PICKUP',
-  'PICKED_UP',
-  'OUT_FOR_DELIVERY',
-  'DELIVERED',
-  'CANCELLED',
+  'PENDING', // placed, waiting for payment,
+  'CONFIRMED', // payment confirmed by stripe webhook
+  'PREPARING', // restaurant accepted and is cooking
+  'READY', // ready for driver pickup
+  'PICKED_UP', // driver has picked up the item
+  'DELIVERED', //order deliverd to customer
+  'CANCELLED', //cancelled at any stage
 ]);
 
 export const orders = pgTable('orders', {

@@ -8,12 +8,18 @@ import {
 import { NeonHttpDatabase } from 'drizzle-orm/neon-http';
 import * as schema from '../db/schema';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { eq, and, inArray } from 'drizzle-orm';
-import { UserRole } from '@food-delivery/types';
+import { eq, desc, inArray, SQL } from 'drizzle-orm';
+import { OrderStatus, UserRole } from '@food-delivery/types';
+import { OrdersGateWay } from '../gateway/orders.gateway';
+import { DriverService } from '../driver/driver.service';
 
 @Injectable()
-export class OrderService {
-  constructor(@Inject('DB') private db: NeonHttpDatabase<typeof schema>) {}
+export class OrdersService {
+  constructor(
+    @Inject('DB') private db: NeonHttpDatabase<typeof schema>,
+    private ordersGateway: OrdersGateWay,
+    private driverService: DriverService,
+  ) {}
 
   async create(customerId: string, dto: CreateOrderDto) {
     const menuItemIds = dto.items.map((item) => item.menuItemId);
@@ -85,6 +91,18 @@ export class OrderService {
       .where(eq(schema.orders.customerId, customerId));
   }
 
+  async findByDriver(driverId: string) {
+    return this.findOrdersWithDetails(eq(schema.orders.driverId, driverId));
+  }
+
+  // routes to customer or driver query based on JWT role
+  async findMyOrders(userId: string, role: string) {
+    if (role === UserRole.DRIVER) {
+      return this.findByDriver(userId);
+    }
+    return this.findByCustomer(userId);
+  }
+
   async findById(orderId: string, user: { sub: string; role: string }) {
     const [order] = await this.db
       .select()
@@ -114,6 +132,94 @@ export class OrderService {
     return { ...order, items };
   }
 
+  async findByRestaurant(ownerId: string) {
+    const [restaurant] = await this.db
+      .select()
+      .from(schema.restaurants)
+      .where(eq(schema.restaurants.ownerId, ownerId));
+
+    if (!restaurant) throw new NotFoundException('Restaurant not found');
+
+    return this.findOrdersWithDetails(
+      eq(schema.orders.restaurantId, restaurant.id),
+    );
+  }
+
+  async updateStatus(
+    orderId: string,
+    newStatus: OrderStatus,
+    user: { sub: string; role: string },
+  ) {
+    const [order] = await this.db
+      .select()
+      .from(schema.orders)
+      .where(eq(schema.orders.id, orderId));
+
+    if (!order) throw new NotFoundException('Order not found!');
+
+    this.validateTransition(order.status, newStatus, user.role);
+
+    if (user.role === UserRole.RESTAURANT_OWNER) {
+      const [restaurant] = await this.db
+        .select()
+        .from(schema.restaurants)
+        .where(eq(schema.restaurants.ownerId, user.sub));
+
+      if (!restaurant || restaurant.id !== order.restaurantId)
+        throw new ForbiddenException('Unauthorized');
+    }
+
+    if (user.role === UserRole.DRIVER && order.driverId)
+      throw new ForbiddenException(
+        'This order is already assigned to another driver',
+      );
+
+    const [updated] = await this.db
+      .update(schema.orders)
+      .set({
+        status: newStatus,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.orders.id, orderId))
+      .returning();
+
+    this.ordersGateway.emitOrderUdpate(updated);
+
+    if (newStatus === 'READY') {
+      await this.driverService.assignDriver(orderId);
+    }
+    return updated;
+  }
+
+  private validateTransition(
+    currentStatus: string,
+    newStatus: string,
+    role: string,
+  ) {
+    const ownerTransitions: Record<string, string[]> = {
+      CONFIRMED: ['PREPARING', 'CANCELLED'],
+      PREPARING: ['READY', 'CANCELLED'],
+    };
+
+    const driverTransitions: Record<string, string[]> = {
+      READY: ['PICKED_UP'],
+      PICKED_UP: ['DELIVERED'],
+    };
+
+    const allowed =
+      role === UserRole.RESTAURANT_OWNER
+        ? (ownerTransitions[currentStatus] ?? [])
+        : role === UserRole.DRIVER
+          ? (driverTransitions[currentStatus] ?? [])
+          : [];
+
+    if (!allowed.includes(newStatus)) {
+      throw new BadRequestException(
+        `Cannot transition from ${currentStatus} to ${newStatus}`,
+      );
+    }
+  }
+
   private async isOwnerOfRestaurant(ownerId: string, restaurantId: string) {
     const [restaurant] = await this.db
       .select()
@@ -121,5 +227,43 @@ export class OrderService {
       .where(eq(schema.restaurants.ownerId, ownerId));
 
     return restaurant?.id === restaurantId;
+  }
+
+  private async enrichOrders(orderRows: (typeof schema.orders.$inferSelect)[]) {
+    if (orderRows.length === 0) return [];
+
+    const orderIds = orderRows.map((o) => o.id);
+    const restaurantIds = [...new Set(orderRows.map((o) => o.restaurantId))];
+
+    const restaurants = await this.db
+      .select({
+        id: schema.restaurants.id,
+        name: schema.restaurants.name,
+      })
+      .from(schema.restaurants)
+      .where(inArray(schema.restaurants.id, restaurantIds));
+
+    const items = await this.db
+      .select()
+      .from(schema.orderItems)
+      .where(inArray(schema.orderItems.orderId, orderIds));
+
+    const restaurantMap = Object.fromEntries(restaurants.map((r) => [r.id, r]));
+
+    return orderRows.map((order) => ({
+      ...order,
+      restaurant: restaurantMap[order.restaurantId],
+      items: items.filter((i) => i.orderId === order.id),
+    }));
+  }
+
+  private async findOrdersWithDetails(where: SQL) {
+    const orderRows = await this.db
+      .select()
+      .from(schema.orders)
+      .where(where)
+      .orderBy(desc(schema.orders.createdAt));
+
+    return this.enrichOrders(orderRows);
   }
 }

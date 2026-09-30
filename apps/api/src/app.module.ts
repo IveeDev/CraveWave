@@ -8,8 +8,10 @@ import { RestaurantsModule } from './restaurants/restaurants.module';
 import { CuisinesModule } from './cuisines/cuisines.module';
 import { UploadsModule } from './upload/upload.module';
 import { MenuModule } from './menu/menu.module';
-import { OrderModule } from './order/order.module';
+import { OrderModule } from './order/orders.module';
 import { PaymentsModule } from './payments/payments.module';
+import { GatewayModule } from './gateway/gateway.module';
+import { DriverModule } from './driver/driver.module';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { PaymentsModule } from './payments/payments.module';
     MenuModule,
     OrderModule,
     PaymentsModule,
+    GatewayModule,
+    DriverModule,
   ],
   controllers: [AppController],
   providers: [AppService],
