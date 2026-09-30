@@ -9,6 +9,7 @@ import { CuisinesModule } from './cuisines/cuisines.module';
 import { UploadsModule } from './upload/upload.module';
 import { MenuModule } from './menu/menu.module';
 import { OrderModule } from './order/order.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { OrderModule } from './order/order.module';
     UploadsModule,
     MenuModule,
     OrderModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
